@@ -3,6 +3,20 @@ from werkzeug import secure_filename
 import requests
 import os
 import logging
+import peewee
+from peewee import *
+import cryptography
+
+db = MySQLDatabase('dev', user='root', passwd='example', host='db')
+
+class File(peewee.Model):
+    result = peewee.TextField()
+    filename = peewee.TextField()
+
+    class Meta:
+        database = db
+db.connect()
+db.create_tables([File])
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
@@ -20,7 +34,11 @@ def create_new_folder(local_dir):
 def html():
     try:
         pub_ip = requests.get("http://169.254.169.254/latest/meta-data/public-ipv4", timeout=10).content
-        return render_template('index.html', ip=pub_ip)  
+        #pub_ip = 'localhost' # uncomment for local testing
+        all_results = []
+        for r in File.select():
+            all_results.append([r.result, r.filename])
+        return render_template('index.html', ip=pub_ip.decode('utf-8'), results=all_results)  
     except:
         logger.exception("Not able to get EC2 metadata. Not running on AWS?")
         return 'Something went wrong'
@@ -31,11 +49,13 @@ def upload_file():
         f = request.files['file']
         create_new_folder(UPLOAD_FOLDER)
         try:
-            f.save(os.path.join(UPLOAD_FOLDER, secure_filename(f.filename))) # filename can then safely be stored on a regular file system
+            f.save(os.path.join(UPLOAD_FOLDER, secure_filename(f.filename)))
             result='File uploaded successfully'
         except:
             result='Failed to upload file'
             logger.exception(result)
+        file = File(result=result, filename=f.filename)
+        file.save()
         return result
                 
 if __name__ == '__main__':

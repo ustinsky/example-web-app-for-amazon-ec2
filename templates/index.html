@@ -1,9 +1,10 @@
 <html>
    <body>
-         <form action = "http://{{ ip }}:80/upload" method = "POST" 
+      <form action = "http://{{ip}}:80/upload" method = "POST" 
          enctype = "multipart/form-data">
          <input type = "file" name = "file" />
          <input type = "submit"/>
       </form>
+      {{ results }}
    </body>
 </html>

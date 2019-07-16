@@ -11,5 +11,9 @@ RUN pip3 install -r requirements.txt
 
 COPY . /app
 
-ENTRYPOINT ["python3"]
-CMD ["app.py"]
+## The wait tool to force Compose to wait for launching DB first and only then the app
+ADD https://github.com/ufoscout/docker-compose-wait/releases/download/2.2.1/wait /wait
+RUN chmod +x /wait
+
+
+CMD /wait && python3 app.py

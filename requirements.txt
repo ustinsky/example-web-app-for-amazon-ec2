@@ -1,3 +1,6 @@
 flask
 werkzeug
 requests
+peewee
+pymysql
+cryptography
