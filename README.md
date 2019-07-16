@@ -1,7 +1,5 @@
 # How to run
-EC2 only. Requires Python and Pip installed
+Works on Amazon EC2 only.
 ```
-pip install -r requirements.txt
-export FLASK_APP=app.py
-flask run --host=0.0.0.0 --port=80
+docker-compose up --build
 ```

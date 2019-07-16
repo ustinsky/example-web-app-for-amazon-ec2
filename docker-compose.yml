@@ -1,0 +1,15 @@
+version: '3'
+services:
+  web:
+    restart: always
+    build: .
+    ports:
+    - "80:80"
+    depends_on:
+      - "db"
+  db:
+    restart: always
+    image: mysql
+    command: --default-authentication-plugin=mysql_native_password
+    environment:
+      MYSQL_ROOT_PASSWORD: example
