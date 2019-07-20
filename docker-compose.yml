@@ -5,21 +5,5 @@ services:
     build: .
     ports:
     - "80:80"
-    depends_on:
-    - "db"
-    links:
-    - db
-    environment:
-      WAIT_HOSTS: db:3306
-  db:
-    restart: always
-    image: mysql
-    environment:
-      MYSQL_ROOT_PASSWORD: example
-    ports:
-    - "3306:3306"
-    security_opt:
-    - seccomp:unconfined
-    command: --init-file /data/application/init.sql
-    volumes:
-        - ./init.sql:/data/application/init.sql
+    env_file:
+    - env/.env

@@ -7,7 +7,7 @@ import peewee
 from peewee import *
 import cryptography
 
-db = MySQLDatabase('dev', user='root', passwd='example', host='db')
+db = MySQLDatabase('dev', user=os.environ.get('DB_USER'), passwd=os.environ.get('DB_PASS'), host=os.environ.get('DB_URL'))
 
 class File(peewee.Model):
     result = peewee.TextField()
@@ -15,6 +15,7 @@ class File(peewee.Model):
 
     class Meta:
         database = db
+
 db.connect()
 db.create_tables([File])
 
