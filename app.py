@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, redirect
 from werkzeug import secure_filename
 import requests
 import os
@@ -6,7 +6,9 @@ import logging
 import peewee
 from peewee import *
 import cryptography
+import boto3
 
+s3client = boto3.client('s3')
 db = MySQLDatabase('dev', user=os.environ.get('DB_USER'), passwd=os.environ.get('DB_PASS'), host=os.environ.get('DB_URL'))
 
 class File(peewee.Model):
@@ -46,11 +48,11 @@ def html():
 
 @app.route('/upload', methods = ['GET', 'POST'])
 def upload_file():
-   if request.method == 'POST':
+    if request.method == 'POST':
         f = request.files['file']
         create_new_folder(UPLOAD_FOLDER)
         try:
-            f.save(os.path.join(UPLOAD_FOLDER, secure_filename(f.filename)))
+            s3client.upload_fileobj(f, Bucket=os.environ.get('S3_FILE_BUCKET'), Key=f.filename)
             result='File uploaded successfully'
         except:
             result='Failed to upload file'
@@ -58,6 +60,8 @@ def upload_file():
         file = File(result=result, filename=f.filename)
         file.save()
         return result
+    else:
+        return redirect('/')
                 
 if __name__ == '__main__':
    app.run(debug = True, host='0.0.0.0', port='80')

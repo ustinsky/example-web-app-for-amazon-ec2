@@ -4,3 +4,4 @@ requests
 peewee
 pymysql
 cryptography
+boto3
