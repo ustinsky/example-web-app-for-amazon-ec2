@@ -9,7 +9,18 @@ import cryptography
 import boto3
 
 s3client = boto3.client('s3')
-db = MySQLDatabase('dev', user=os.environ.get('DB_USER'), passwd=os.environ.get('DB_PASS'), host=os.environ.get('DB_URL'))
+ssmclient = boto3.client('ssm', region_name='eu-central-1')
+
+params = {'DB_USER': '', 'DB_PASS': '', 'DB_URL': '', 'S3_FILE_BUCKET': ''}
+
+for key in params:
+    response = ssmclient.get_parameter(
+        Name=key,
+        WithDecryption=True|False
+    )
+    params[key]=response['Parameter']['Value']
+
+db = MySQLDatabase('dev', user=params['DB_USER'], passwd=params['DB_PASS'], host=params['DB_URL'])
 
 class File(peewee.Model):
     result = peewee.TextField()
@@ -52,7 +63,7 @@ def upload_file():
         f = request.files['file']
         create_new_folder(UPLOAD_FOLDER)
         try:
-            s3client.upload_fileobj(f, Bucket=os.environ.get('S3_FILE_BUCKET'), Key=f.filename)
+            s3client.upload_fileobj(f, Bucket=params['S3_FILE_BUCKET'], Key=f.filename)
             result='File uploaded successfully'
         except:
             result='Failed to upload file'
